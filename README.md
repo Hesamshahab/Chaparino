@@ -1,3 +1,5 @@
+<p align="center"> <img src="assets/logo.png" width="200" alt="Chaparino Logo"> </p>
+
 # 🕊️ Chaparino
 
 **Chaparino** is a lightweight, modular messaging microservice designed to bridge the gap between your application and various communication gateways. It currently provides out-of-the-box support for **[SMS.ir](http://SMS.ir)** and the **Bale** messaging platform.
