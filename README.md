@@ -1,50 +1,47 @@
-<p align="center"> <img src="assets/logo.png" width="200" alt="Chaparino Logo"> </p>
+# 🕊️ Chaparino
 
+**Chaparino** is a lightweight, modular messaging microservice designed to bridge the gap between your application and various communication gateways. It currently provides out-of-the-box support for **[SMS.ir](http://SMS.ir)** and the **Bale** messaging platform.
 
-## 🕊️ Chaparino (چاپارینو)
+Built with **FastAPI**, Chaparino focuses on high-performance dispatch, dynamic templating, and seamless bulk messaging orchestration.
 
-سرویس **Chaparino** یک سرویس سبک (Lightweight) و ماژولار برای مدیریت و ارسال پیام از طریق درگاه‌های **[SMS.ir](http://SMS.ir)** و پیام‌رسان **Bale** است. این پروژه تمرکز خود را بر سرعت ارسال، مدیریت قالب‌های پویا (Dynamic Templates) و قابلیت ارسال گروهی گذاشته است.
+**[CHAPARINO.IR](https://chaparino.ir/)**
+
+---
+
+## ✨ Key Features
+
+* **Multi-Provider Support**: Unified interface for [SMS.ir](http://SMS.ir) (SMS gateway) and Bale (Messaging API).
+* **Dynamic Templating**: Centralized template management using Python-based string formatting for variables like `{name}`, `{code}`, or `{time}`.
+* **Intelligent Phone Normalization**: Automatically formats phone numbers for different providers (e.g., converting `0912...` to international `98912...` for Bale).
+* **Bulk Dispatch**: High-efficiency batch processing for **CSV** and **Excel** files.
+* **Developer Friendly**: Auto-generated interactive API documentation via Swagger UI.
+* **Docker Ready**: Streamlined deployment using containerization.
 
 
 ---
 
-## ✨ ویژگی‌های کلیدی
-
-ویژگی **Multi-Provider Support:** پشتیبانی همزمان از پنل پیامک [SMS.ir](http://SMS.ir) و پلتفرم بله (Bale API). 
-
-ویژگی  **Dynamic Templating:** مدیریت متمرکز قالب‌ها با قابلیت جایگذاری متغیرهای دلخواه (مثل نام، کد تخفیف و ...). ویژگی\*   **Bulk Dispatch:** قابلیت ارسال گروهی پیام از طریق فایل‌های **CSV** و **Excel**.
-
- ویژگی **Phone Normalization:** هوشمندسازی شماره تماس‌ها (تبدیل خودکار به فرمت بین‌المللی برای بله و فرمت داخلی برای پیامک).
-
- ویژگی **FastAPI Powered:** ارائه API‌های استاندارد و سریع برای یکپارچگی با سایر پروژه‌ها.
-
-ویژگی **Docker Ready:** آماده استقرار سریع در محیط‌های Containerized.
-
-
----
-
-## 🛠 ساختار پروژه
+## 🛠 Project Structure
 
 ```text
 .
 ├── app
-│   ├── main.py          # نقطه ورود API (FastAPI)
-│   ├── core.py          # منطق اصلی ارسال و نرمال‌سازی
-│   ├── templates.py     # مدیریت متغیرها و متن پیام‌ها
-│   └── utils.py         # پردازش فایل‌های گروهی (CSV/Excel)
-├── data                 # محل فایل‌های ورودی (اختیاری)
-├── .env                 # تنظیمات حساس (Keys & Tokens)
-└── Dockerfile           # فایل استقرار داکر
+│   ├── main.py          # FastAPI entry point & API routing
+│   ├── core.py          # Core logic, provider integration & normalization
+│   ├── templates.py     # Message template definitions & logic
+│   └── utils.py         # File processing utilities (CSV/Excel)
+├── data                 # Optional directory for bulk data files
+├── .env                 # Environment variables (excluded from Git)
+└── Dockerfile           # Docker image configuration
 ```
 
 
 ---
 
-## 🚀 راه اندازی سریع
+## 🚀 Getting Started
 
-### ۱. تنظیمات محیطی
+### 1. Environment Configuration
 
-ابتدا فایل `.env` را در ریشه پروژه ایجاد کرده و مقادیر مربوطه را وارد کنید:
+Create a `.env` file in the root directory and populate it with your credentials:
 
 ```env
 
@@ -57,7 +54,7 @@ SMS_IR_KEY=your_api_key
 SMS_IR_LINE=your_line_number
 ```
 
-### ۲. اجرا با Docker (پیشنهادی)
+### 2. Run with Docker (Recommended)
 
 ```bash
 
@@ -65,7 +62,7 @@ docker build -t chaparino .
 docker run -p 8000:8000 --env-file .env chaparino
 ```
 
-### ۳. اجرا به صورت محلی
+### 3. Local Installation
 
 ```bash
 
@@ -77,125 +74,97 @@ uvicorn app.main:app --reload
 
 ---
 
-## 📖 راهنمای استفاده از API
+## 📖 API Documentation
 
-### ارسال تک پیام
+Once the service is running, access the interactive docs at `http://localhost:8000/docs`.
 
-برای ارسال پیام تکی، از Endpoint زیر استفاده کنید: `POST /send/single`
+### Single Dispatch
 
-**پارامترهای ورودی (Form-Data):**
+**Endpoint:** `POST /send/single`
 
-| پارامتر | نوع | توضیحات |
-|:---|:---|:---|
-| `provider` | string | مقدار `sms` یا `bale` |
-| `template` | string | نام قالب (مثلاً `welcome` یا `otp`) |
-| `phone` | string | شماره موبایل مقصد |
-| `params` | JSON string | متغیرهای قالب: `{"name": "امیر"}` |
+| Parameter | Type | Description |
+|----|----|----|
+| `provider` | string | `sms` or `bale` |
+| `template` | string | Template name (e.g., `otp`, `welcome`) |
+| `phone` | string | Recipient phone number |
+| `params` | JSON string | Template variables: `{"name": "Hesam"}` |
 
-### ارسال گروهی (Bulk)
+### Bulk Dispatch
 
-`POST /send/bulk`
-
-فایل ارسالی (CSV/Excel) باید دارای ستونی به نام `phone` باشد. سایر ستون‌ها بر اساس نامشان در قالب پیام جایگذاری می‌شوند.
+**Endpoint:** `POST /send/bulk` Upload a CSV or Excel file. The system expects a `phone` column; all other columns are automatically mapped to template variables.
 
 
 ---
 
-## 📝 مدیریت قالب‌ها (Templates)
+## 📝 Managing Templates
 
-قالب‌های خود را در فایل `app/templates.py` مدیریت کنید. شما می‌توانید از متغیرهای ثابت (مثل نام شرکت) و متغیرهای متغیر (پاس داده شده در لحظه ارسال) استفاده کنید:
+Templates are managed in `app/templates.py`. You can combine static strings with dynamic placeholders:
 
 ```python
-# نمونه قالب
-"welcome": "سلام {name} عزیز، به {company_name} خوش آمدید."
+# Example Template Definition
+"welcome": "Hello {name}, welcome to {company_name}!"
 ```
 
+### Usage Examples (cURL)
 
----
+**Single Send:**
 
-## نمونه cURL:
+```bash
 
+curl -X 'POST' \
+  'http://localhost:8000/send/single' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'provider=bale' \
+  -F 'template=otp' \
+  -F 'phone=0912XXXXXXX' \
+  -F 'params={"code": "2829", "company_name": "Chaparino"}'
 ```
-curl -X 'POST' \ 
-'http://localhost:8000/send/single' \
--H 'Content-Type: multipart/form-data' \
- -F 'provider=bale' \
- -F 'template=otp' \
- -F 'phone=0912XXXXXXX' \
- -F 'params={"code": "2829","company_name":"چاپارینو"}'
-```
 
-```
+**Bulk Send via CSV:**
+
+```bash
+
 curl -X 'POST' \
   'http://localhost:8000/send/bulk' \
   -H 'Content-Type: multipart/form-data' \
   -F 'provider=sms' \
   -F 'template=announcement' \
-  -F 'file=@/path/to/your/users.csv'
+  -F 'file=@/path/to/users.csv'
 ```
 
-### 📂 فایل‌های نمونه جهت ارسال گروهی
 
-سیستم به‌طور خودکار سرتیتر (Header) ستون‌ها را با متغیرهای قالب (Template Variables) تطبیق می‌دهد.
+---
 
-**مثال ۱ (اطلاع‌رسانی):**
+## 📂 Bulk File Samples
+
+The system intelligently restores missing leading zeros often removed by Excel formatting.
+
+**Sample 1 (Announcement):**
 
 | phone | name | time |
-|:---|:---|:---|
-| 09121111111 | علی علوی | ۱۰:۳۰ |
-| 09122222222 | سارا ساروی | ۱۱:۰۰ |
+|----|----|----|
+| 09121111111 | Ali Alavi | 10:30 |
 
-**مثال ۲ (کد تایید - بدون صفر اول):**
+**Sample 2 (OTP - Missing Zeros):**
 
 | phone | code |
-|:---|:---|
+|----|----|
 | 912XXXXXXX | 8713 |
-| 936XXXXXXX | 9034 |
-
-> **نکته:** Chaparino هوشمند است! اگر فایل شما به دلیل تنظیمات اکسل فاقد صفر اول در شماره تماس باشد، سیستم در زمان ارسال آن را بازیابی و اصلاح می‌کند.
 
 
 ---
 
-## 🤝 مشارکت
+## 🤝 Contributing
 
-اگر پیشنهادی برای اضافه کردن پروایدرهای جدید (مثل Telegram یا سرویس‌های دیگر) دارید، خوشحال می‌شویم Pull Request ارسال کنید یا در بخش Issues مطرح کنید.
-
-
----
-
-**Chaparino** - *سریع مثل چاپار، مدرن مثل تکنولوژی.*
+Contributions are welcome! If you'd like to add support for new providers (Telegram, WhatsApp, etc.), please submit a Pull Request or open an issue.
 
 
 ---
 
-## LICENSE
+## 📄 License
 
-MIT No Attribution
+**MIT No Attribution**
 
-Copyright 2026 Amirhesamshahab (<https://hesamshahab.com>)
+Copyright 2026 Amirhesamshahab ([hesamshahab.com](https://hesamshahab.com))
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-
-of this software and associated documentation files (the "Software"), to deal
-
-in the Software without restriction, including without limitation the rights
-
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-
-copies of the Software, and to permit persons to whom the Software is
-
-furnished to do so.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-
-SOFTWARE.
-
-
----
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so.
