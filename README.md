@@ -1,8 +1,6 @@
-<p align="center"> <img src="assets/logo.png" width="200" alt="Chaparino Logo"> </p>
-
 # 🕊️ Chaparino
 
-**Chaparino** is a lightweight, modular messaging microservice designed to bridge the gap between your application and various communication gateways. It currently provides out-of-the-box support for **[SMS.ir](http://SMS.ir)** and the **Bale** messaging platform.
+**Chaparino** is a lightweight, modular messaging microservice designed to bridge the gap between your application and various communication gateways. It currently provides out-of-the-box support for **[SMS.ir](http://SMS.ir)** and the **[Bale](https://ble.ir)** messaging platform.
 
 Built with **FastAPI**, Chaparino focuses on high-performance dispatch, dynamic templating, and seamless bulk messaging orchestration.
 
@@ -12,7 +10,8 @@ Built with **FastAPI**, Chaparino focuses on high-performance dispatch, dynamic 
 
 ## ✨ Key Features
 
-* **Multi-Provider Support**: Unified interface for [SMS.ir](http://SMS.ir) (SMS gateway) and Bale (Messaging API).
+* **Multi-Provider Support**: Unified interface for [SMS.ir](http://SMS.ir) (SMS gateway) and [Bale](https://ble.ir) (Messaging API).
+* **API Key Authentication**: Secure endpoint access with a custom `X-API-Key` header and multi-client environment mapping.
 * **Dynamic Templating**: Centralized template management using Python-based string formatting for variables like `{name}`, `{code}`, or `{time}`.
 * **Intelligent Phone Normalization**: Automatically formats phone numbers for different providers (e.g., converting `0912...` to international `98912...` for Bale).
 * **Bulk Dispatch**: High-efficiency batch processing for **CSV** and **Excel** files.
@@ -27,15 +26,15 @@ Built with **FastAPI**, Chaparino focuses on high-performance dispatch, dynamic 
 ```text
 .
 ├── app
-│   ├── main.py          # FastAPI entry point & API routing
+│   ├── main.py          # FastAPI entry point, API routing & Authentication middleware
 │   ├── core.py          # Core logic, provider integration & normalization
 │   ├── templates.py     # Message template definitions & logic
 │   └── utils.py         # File processing utilities (CSV/Excel)
 ├── data                 # Optional directory for bulk data files
 ├── .env                 # Environment variables (excluded from Git)
 └── Dockerfile           # Docker image configuration
-```
 
+```
 
 ---
 
@@ -46,33 +45,31 @@ Built with **FastAPI**, Chaparino focuses on high-performance dispatch, dynamic 
 Create a `.env` file in the root directory and populate it with your credentials:
 
 ```env
-
 BALE_ACCESS_KEY=your_access_key
-
 BALE_BOT_ID=your_bot_id
-
 SMS_IR_KEY=your_api_key
-
 SMS_IR_LINE=your_line_number
+
+# Allowed clients in JSON format (Do NOT wrap the value in outer single/double quotes)
+CHAPARINO_CLIENTS={"client-name": "secure_api_key_here", "another-client": "another_secure_key"}
+
 ```
 
 ### 2. Run with Docker (Recommended)
 
 ```bash
-
 docker build -t chaparino .
 docker run -p 8000:8000 --env-file .env chaparino
+
 ```
 
 ### 3. Local Installation
 
 ```bash
-
 pip install -r requirements.txt
-
 uvicorn app.main:app --reload
-```
 
+```
 
 ---
 
@@ -80,12 +77,15 @@ uvicorn app.main:app --reload
 
 Once the service is running, access the interactive docs at `http://localhost:8000/docs`.
 
+> 🔒 **Authentication**: All endpoints require the `X-API-Key` header populated with a valid key defined in your `CHAPARINO_CLIENTS` environment variable.
+
 ### Single Dispatch
 
 **Endpoint:** `POST /send/single`
 
-| Parameter | Type | Description |
-|----|----|----|
+| Header / Parameter | Type | Description |
+| --- | --- | --- |
+| `X-API-Key` **(Header)** | string | Your secure API client key |
 | `provider` | string | `sms` or `bale` |
 | `template` | string | Template name (e.g., `otp`, `welcome`) |
 | `phone` | string | Recipient phone number |
@@ -93,8 +93,7 @@ Once the service is running, access the interactive docs at `http://localhost:80
 
 ### Bulk Dispatch
 
-**Endpoint:** `POST /send/bulk` Upload a CSV or Excel file. The system expects a `phone` column; all other columns are automatically mapped to template variables.
-
+**Endpoint:** `POST /send/bulk` Upload a CSV or Excel file. The system expects a `phone` column; all other columns are automatically mapped to template variables. Requires `X-API-Key` header.
 
 ---
 
@@ -105,6 +104,7 @@ Templates are managed in `app/templates.py`. You can combine static strings with
 ```python
 # Example Template Definition
 "welcome": "Hello {name}, welcome to {company_name}!"
+
 ```
 
 ### Usage Examples (cURL)
@@ -112,28 +112,29 @@ Templates are managed in `app/templates.py`. You can combine static strings with
 **Single Send:**
 
 ```bash
-
 curl -X 'POST' \
   'http://localhost:8000/send/single' \
+  -H 'X-API-Key: secure_api_key_here' \
   -H 'Content-Type: multipart/form-data' \
   -F 'provider=bale' \
   -F 'template=otp' \
   -F 'phone=0912XXXXXXX' \
   -F 'params={"code": "2829", "company_name": "Chaparino"}'
+
 ```
 
 **Bulk Send via CSV:**
 
 ```bash
-
 curl -X 'POST' \
   'http://localhost:8000/send/bulk' \
+  -H 'X-API-Key: secure_api_key_here' \
   -H 'Content-Type: multipart/form-data' \
   -F 'provider=sms' \
   -F 'template=announcement' \
   -F 'file=@/path/to/users.csv'
-```
 
+```
 
 ---
 
@@ -144,22 +145,20 @@ The system intelligently restores missing leading zeros often removed by Excel f
 **Sample 1 (Announcement):**
 
 | phone | name | time |
-|----|----|----|
+| --- | --- | --- |
 | 09121111111 | Ali Alavi | 10:30 |
 
 **Sample 2 (OTP - Missing Zeros):**
 
 | phone | code |
-|----|----|
+| --- | --- |
 | 912XXXXXXX | 8713 |
-
 
 ---
 
 ## 🤝 Contributing
 
 Contributions are welcome! If you'd like to add support for new providers (Telegram, WhatsApp, etc.), please submit a Pull Request or open an issue.
-
 
 ---
 
