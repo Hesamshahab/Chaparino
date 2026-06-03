@@ -10,6 +10,7 @@ class ChaparinoTemplates:
         "welcome": "سلام {name} عزیز، به {company_name} خوش آمدید.",
         "otp": "کد تایید شما: {code}\n{company_name}",
         "announcement": "همکار گرامی {name}، جلسه در ساعت {time} برگزار می‌شود.",
+        "offer": "سلام }{name}\nتخفیف }{percent} برای شما فعال شد\n{company_name}"
     }
 
     @classmethod
